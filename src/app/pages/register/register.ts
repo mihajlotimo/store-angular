@@ -9,6 +9,10 @@ import {
   Validators,
 } from '@angular/forms';
 import { FormErrors } from '../../shared/components/form-errors';
+import { Store } from '@ngrx/store';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { authFeatures } from '../../shared/store/auth-feature';
+import { authActions } from '../../shared/store/auth-actions';
 
 @Component({
   selector: 'app-register',
@@ -63,7 +67,9 @@ import { FormErrors } from '../../shared/components/form-errors';
         <app-form-errors [control]="registerForm" />
       </div>
 
-      <button size="lg" type="submit" appButton class="w-full">Register</button>
+      <button size="lg" type="submit" appButton class="w-full" [disabled]="isLoading()">
+        {{ isLoading() ? 'Registering...' : 'Register' }}
+      </button>
 
       <p class="text-center text-xs text-slate-400">
         Already have an account?
@@ -93,9 +99,15 @@ export class Register {
     },
   );
 
+  private readonly store = inject(Store);
+  protected readonly isLoading = toSignal(this.store.select(authFeatures.selectIsLoading));
+
   onSubmit() {
     if (this.registerForm.valid) {
-      console.log(this.registerForm.value);
+      const id = Date.now();
+      const { confirmPassword, ...rest } = this.registerForm.value;
+      const registerRequest = { id, ...rest };
+      this.store.dispatch(authActions.register(registerRequest));
     } else {
       this.registerForm.markAllAsTouched();
     }

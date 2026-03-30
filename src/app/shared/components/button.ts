@@ -36,7 +36,7 @@ const iconSizeClasses: Record<ButtonSize, string> = {
 export class Button {
   readonly variant = input<ButtonVariant>('primary');
   readonly size = input<ButtonSize>('md');
-  readonly disabled = input<boolean>(false);
+  readonly disabled = input<boolean | undefined>(false);
 
   protected readonly hostClasses = computed(() => {
     const base =

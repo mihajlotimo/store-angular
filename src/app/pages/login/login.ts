@@ -3,6 +3,10 @@ import { Button } from '../../shared/components/button';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormErrors } from '../../shared/components/form-errors';
+import { Store } from '@ngrx/store';
+import { authActions } from '../../shared/store/auth-actions';
+import { authFeatures } from '../../shared/store/auth-feature';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-login',
@@ -35,7 +39,9 @@ import { FormErrors } from '../../shared/components/form-errors';
         <app-form-errors [control]="loginForm.get('password')!" />
       </div>
 
-      <button size="lg" type="submit" appButton class="w-full">Sign In</button>
+      <button size="lg" type="submit" appButton class="w-full" [disabled]="isLoading()">
+        {{ isLoading() ? 'Signing In...' : 'Sign In' }}
+      </button>
 
       <p class="text-center text-xs text-slate-400">
         Don't have an account?
@@ -54,9 +60,12 @@ export class Login {
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
+  private readonly store = inject(Store);
+  protected readonly isLoading = toSignal(this.store.select(authFeatures.selectIsLoading));
+
   onSubmit() {
     if (this.loginForm.valid) {
-      console.log(this.loginForm.value);
+      this.store.dispatch(authActions.login(this.loginForm.value));
     } else {
       this.loginForm.markAllAsTouched();
     }
