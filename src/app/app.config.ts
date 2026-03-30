@@ -4,7 +4,7 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
-
+import { provideNgToast } from 'ng-angular-popup';
 import { routes } from './app.routes';
 import { provideState, provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
@@ -25,6 +25,11 @@ export const appConfig: ApplicationConfig = {
       provide: API_URL,
       useValue: 'https://fakestoreapi.com',
     },
+    provideNgToast({
+      duration: 2000,
+      position: 'toaster-top-right',
+      minWidth: 250,
+    }),
   ],
 };
 

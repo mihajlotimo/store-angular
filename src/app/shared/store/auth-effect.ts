@@ -6,11 +6,13 @@ import { Router } from '@angular/router';
 import { AuthApi } from '../services/auth-api';
 import { MyStorage } from '../services/storage';
 import { extractToken } from '../util/extractToken';
+import { NgToastService } from 'ng-angular-popup';
 
 export const loginEffect = createEffect(
   (
     actions$ = inject(Actions),
     authApi = inject(AuthApi),
+    toast = inject(NgToastService),
     router = inject(Router),
     storage = inject(MyStorage),
   ) => {
@@ -20,6 +22,7 @@ export const loginEffect = createEffect(
         return authApi.login(loginRequest).pipe(
           map((response) => {
             router.navigateByUrl('/products');
+            toast.success('Login successful', 'SUCCESS');
             storage.setItem('ngrxstore_token', response.token);
             const payload = extractToken(response.token);
 
@@ -29,6 +32,7 @@ export const loginEffect = createEffect(
             return authActions.loginSucces({ token: response.token, userId: null });
           }),
           catchError((error) => {
+            toast.danger('Login failed', 'ERROR');
             return of(authActions.loginFailure({ error: error.message }));
           }),
         );
@@ -41,16 +45,23 @@ export const loginEffect = createEffect(
 );
 
 export const registerEffect = createEffect(
-  (actions$ = inject(Actions), authApi = inject(AuthApi), router = inject(Router)) => {
+  (
+    actions$ = inject(Actions),
+    authApi = inject(AuthApi),
+    toast = inject(NgToastService),
+    router = inject(Router),
+  ) => {
     return actions$.pipe(
       ofType(authActions.register),
       switchMap((registerRequest) => {
         return authApi.register(registerRequest).pipe(
           map(() => {
             router.navigateByUrl('/login');
+            toast.success('Registration successful', 'SUCCESS');
             return authActions.registerSucces();
           }),
           catchError((error) => {
+            toast.danger('Registration failed', 'ERROR');
             return of(authActions.registerFailure({ error: error.message }));
           }),
         );
